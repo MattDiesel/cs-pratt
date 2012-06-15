@@ -79,20 +79,14 @@ namespace PrattParser
             public delegate T NudHandler();
             public delegate T LedHandler(T left);
 
-            public virtual NudHandler Nud
+            public virtual T Nud()
             {
-                get
-                {
-                    throw new Exception( );
-                }
+                throw new Exception( );
             }
 
-            public virtual LedHandler Led
+            public virtual T Led(T left)
             {
-                get
-                {
-                    throw new Exception( );
-                }
+                throw new Exception( );
             }
         }
 

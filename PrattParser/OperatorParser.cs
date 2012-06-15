@@ -32,12 +32,9 @@ namespace PrattParser
                 this.Value = value;
             }
 
-            public override NudHandler Nud
+            public override T Nud()
             {
-                get
-                {
-                    return ( ) => this.Value;
-                }
+                return this.Value;
             }
         }
 
@@ -73,12 +70,9 @@ namespace PrattParser
             {
             }
 
-            public override LedHandler Led
+            public override T Led(T left)
             {
-                get
-                {
-                    return ( left ) => this.Function( left, this.parser.Parse( this.Lbp ) );
-                }
+                return this.Function( left, this.parser.Parse( this.Lbp ) );
             }
         }
 
@@ -89,12 +83,9 @@ namespace PrattParser
             {
             }
 
-            public override NudHandler Nud
+            public override T Nud()
             {
-                get
-                {
-                    return ( ) => this.Function( this.parser.Parse( this.Lbp ) );
-                }
+                return this.Function( this.parser.Parse( this.Lbp ) );
             }
         }
 
@@ -105,12 +96,9 @@ namespace PrattParser
             {
             }
 
-            public override LedHandler Led
+            public override T Led(T left)
             {
-                get
-                {
-                    return ( left ) => this.Function( left );
-                }
+                return this.Function( left );
             }
         }
 

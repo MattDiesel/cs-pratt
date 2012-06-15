@@ -57,20 +57,14 @@ namespace TestApplication
             {
             }
 
-            public override Token.NudHandler Nud
+            public override int Nud()
             {
-                get
-                {
-                    return ( ) => this.parser.Parse( this.Lbp );
-                }
+                return this.parser.Parse( this.Lbp );
             }
 
-            public override LedHandler Led
+            public override int Led(int left)
             {
-                get
-                {
-                    return ( left ) => ( left + this.parser.Parse( this.Lbp ) );
-                }
+                return left + this.parser.Parse( this.Lbp );
             }
         }
 
@@ -81,20 +75,14 @@ namespace TestApplication
             {
             }
 
-            public override Token.NudHandler Nud
+            public override int Nud()
             {
-                get
-                {
-                    return ( ) => -this.parser.Parse( this.Lbp );
-                }
+                return -this.parser.Parse( this.Lbp );
             }
 
-            public override LedHandler Led
+            public override int Led(int left)
             {
-                get
-                {
-                    return ( left ) => ( left - this.parser.Parse( this.Lbp ) );
-                }
+                return left - this.parser.Parse( this.Lbp );
             }
         }
 
