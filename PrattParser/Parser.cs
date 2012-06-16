@@ -4,8 +4,43 @@ using System.IO;
 
 namespace PrattParser
 {
+    public class ParserException : Exception
+    {
+        string s;
+        int line;
+        int col;
+        string file;
+
+        public ParserException(string msg)
+            : this(msg, "", -1, -1)
+        {
+        }
+
+        public ParserException(string msg, PositionalTextReader reader)
+            : this(msg, reader.Source, reader.Line, reader.Col)
+        {
+        }
+
+        public ParserException(string msg, string file, int line, int col)
+        {
+            this.s = msg;
+            this.file = file;
+            this.line = line;
+            this.col = col;
+        }
+
+        public override string Message
+        {
+            get
+            {
+                return String.Format( "{0} ({1}:{2}): {3}", this.file, this.line, this.col, this.s );
+            }
+        }
+    }
+
     public enum Precedence : int
     {
+        End = -1,
         None = 0,
         Assignment = 100,
         LogicalOR = 200,
@@ -32,7 +67,7 @@ namespace PrattParser
     /// </typeparam>
     public class Parser<T>
     {
-        public TextReader reader;
+        public PositionalTextReader reader;
         private Token token;
 
         /// <summary>
@@ -81,12 +116,16 @@ namespace PrattParser
 
             public virtual T Nud()
             {
-                throw new Exception( );
+                throw new ParserException(
+                    String.Format("Token type {0} cannot appear at the beginning of an expression.", this.Name ),
+                    this.parser.reader );
             }
 
             public virtual T Led(T left)
             {
-                throw new Exception( );
+                throw new ParserException(
+                    String.Format( "Token type {0} cannot appear in the middle of an expression.", this.Name ),
+                    this.parser.reader );
             }
         }
 
@@ -97,9 +136,9 @@ namespace PrattParser
         /// <returns>The result of type T.</returns>
         public T Parse(TextReader input)
         {
-            this.reader = input;
+            this.reader = new PositionalTextReader(input, input.GetType().Name);
 
-            this.token = this.Advance( );
+            this.Step( );
             return this.Parse( Precedence.None );
         }
 
@@ -117,7 +156,7 @@ namespace PrattParser
             T left = t.Nud();
 
             // Parser loop. Handles precedence.
-            while (rbp < token.Lbp)
+            while (rbp <= token.Lbp)
             {
                 t = this.token;
                 this.Step( );
@@ -129,9 +168,10 @@ namespace PrattParser
 
         /// <summary>Advances to the next token in the reader stream.</summary>
         /// <remarks>
-        /// The current string being read is held in this.reader, and is designed to be used by this function.
+        /// Do not call this function directly unless you know you have to. Call the Parser.Step()
+        /// method instead.
         /// 
-        /// For an example see the SimpleParser class.
+        /// The current string being read is held in this.reader, and is designed to be used by this function.
         /// </remarks>
         /// <returns>Either a new token, or an existing one in the symbol table.</returns>
         public virtual Token Advance()
@@ -139,17 +179,106 @@ namespace PrattParser
             throw new NotImplementedException( );
         }
 
+        /// <summary>
+        /// Advance to the next token in the stream, and sets internal variables.
+        /// </summary>
         public void Step()
         {
-            this.token = this.Advance( );
+            this.Step( "" );
         }
 
+        /// <summary>
+        /// Advance to the next token in the stream, checking to make sure it is the right
+        /// type, and sets internal variables.
+        /// </summary>
+        /// <param name="t">The token type that must appear next.</param>
         public void Step(Token t)
         {
-            if ( this.token.Name != t.Name )
+            this.Step( t.Name );
+        }
+
+        /// <summary>
+        /// Advance to the next token in the stream, checking to make sure it is the right
+        /// type, and sets internal variables.
+        /// </summary>
+        /// <param name="t">The token type name that must appear next.</param>
+        public void Step(string s)
+        {
+            if ( ( s != "" ) && ( this.token.Name != s ) )
                 throw new Exception( );
 
             this.token = this.Advance( );
+            this.token.parser = this;
+        }
+    }
+
+    /// <summary>
+    /// TextReader wrapper that keeps track of line and column number.
+    /// </summary>
+    public class PositionalTextReader
+    {
+        private TextReader reader;
+        private string source;
+
+        public string Source
+        {
+            get
+            {
+                return this.source;
+            }
+        }
+
+        private int line;
+        public int Line
+        {
+            get
+            {
+                return this.line;
+            }
+        }
+
+        private int col;
+        public int Col
+        {
+            get
+            {
+                return this.col;
+            }
+        }
+
+        public PositionalTextReader(TextReader r, string source)
+        {
+            this.reader = r;
+            this.source = source;
+            this.line = 1;
+            this.col = -1;
+        }
+
+        public PositionalTextReader(string s)
+            : this(new StringReader(s), "<string>")
+        {
+        }
+
+        public int Peek()
+        {
+            return this.reader.Peek( );
+        }
+
+        public int Read( )
+        {
+            int ch = this.reader.Read( );
+
+            if ( ch == '\n' )
+            {
+                this.line++;
+                this.col = 1;
+            }
+            else
+            {
+                this.col++;
+            }
+
+            return ch;
         }
     }
 }

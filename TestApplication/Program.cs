@@ -19,7 +19,15 @@ namespace TestApplication
             StringReader r = new StringReader( s );
 
             Console.Write( "{0} = ", s );
-            Console.WriteLine(p.Parse( r ));
+
+            try
+            {
+                Console.WriteLine( p.Parse( r ) );
+            }
+            catch ( ParserException e )
+            {
+                Console.WriteLine( e.Message );
+            }
 
             Console.ReadKey( );
         }
@@ -33,12 +41,15 @@ namespace TestApplication
         public SimpleParser( )
             : base( )
         {
-            this.Add( new Token( "(end)", 0 ) );
+            this.Add( new Token( "(end)", Precedence.End ) );
             this.Add( new AddOperator( ) );
             this.Add( new SubOperator( ) );
             this.Add( new InfixOperator( "/", Precedence.Multiplication, ( a, b ) => a / b ) );
             this.Add( new InfixOperator( "*", Precedence.Multiplication, ( a, b ) => a * b ) );
             this.Add( new Group( "(", ")" ) );
+            this.Add( new Group( "{", "}" ) );
+            this.Add( new Group( "[", "]" ) );
+            this.Add( new Group( "<", ">" ) );
 
             this.Add( new PostfixOperator( "!", Precedence.UnaryOp, this.factorial ) );
         }
@@ -91,7 +102,10 @@ namespace TestApplication
         {
             int ch;
 
-            ch = this.reader.Read( );
+            do
+            {
+                ch = this.reader.Read( );
+            } while ( Char.IsWhiteSpace( ( char )ch ) );
 
             if ( Char.IsDigit( ( char )ch ) )
             {
@@ -109,41 +123,29 @@ namespace TestApplication
 
                 return new Literal( Int32.Parse( b.ToString( ) ) );
             }
-            else if ( ch == '+' )
-            {
-                return this.Symbols[ "+" ];
-            }
-            else if ( ch == '-' )
-            {
-                return this.Symbols[ "-" ];
-            }
-            else if ( ch == '*' )
-            {
-                return this.Symbols[ "*" ];
-            }
-            else if ( ch == '/' )
-            {
-                return this.Symbols[ "/" ];
-            }
-            else if ( ch == '!' )
-            {
-                return this.Symbols[ "!" ];
-            }
-            else if ( ch == '(' )
-            {
-                return this.Symbols[ "(" ];
-            }
-            else if ( ch == ')' )
-            {
-                return ((Group)this.Symbols[ "(" ]).End;
-            }
             else if ( ch == -1 )
             {
                 return this.Symbols[ "(end)" ];
             }
+            else if (this.Symbols.ContainsKey(((char)ch).ToString()))
+            {
+                return this.Symbols[ ( ( char )ch ).ToString( ) ];
+            }
             else
             {
-                throw new Exception( );
+                switch (ch)
+                {
+                    case ')':
+                        return ( ( Group )this.Symbols[ "(" ] ).End;
+                    case ']':
+                        return ( ( Group )this.Symbols[ "[" ] ).End;
+                    case '}':
+                        return ( ( Group )this.Symbols[ "{" ] ).End;
+                    case '>':
+                        return ( ( Group )this.Symbols[ "<" ] ).End;
+                    default:
+                        throw new ParserException( String.Format("Illegal character '{0}'.", (char)ch), this.reader );
+                }
             }
         }
     }

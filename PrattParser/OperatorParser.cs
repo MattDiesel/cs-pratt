@@ -45,7 +45,7 @@ namespace PrattParser
             public Group(string start, string end)
                 : base(start)
             {
-                this.End = new Token( end );
+                this.End = new Token( end, Precedence.End );
             }
 
             public override T Nud( )
