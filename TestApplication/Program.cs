@@ -46,7 +46,7 @@ namespace TestApplication
             this.Add( new SubOperator( ) );
             this.Add( new InfixOperator( "/", Precedence.Multiplication, ( a, b ) => new AST("DIV", a, b ) ) );
             this.Add( new InfixOperator( "*", Precedence.Multiplication, ( a, b ) => new AST("MUL", a, b ) ) );
-            this.Add( new Group( "(", ")", Precedence.Multiplication, (a, b) => new AST("MUL", a, b) ) );
+            this.Add( new Group( "(", ")", (InfixOperator)this.Symbols["*"] ) );
             this.Add( new Group( "{", "}" ) );
             this.Add( new Group( "[", "]" ) );
             this.Add( new Group( "<", ">" ) );
@@ -63,7 +63,7 @@ namespace TestApplication
 
             public override AST Nud()
             {
-                return new AST("POS", this.parser.Parse( this.Lbp ), null);
+                return new AST("POS", this.parser.Parse( Precedence.UnaryOp ), null);
             }
 
             public override AST Led(AST left)
@@ -81,7 +81,7 @@ namespace TestApplication
 
             public override AST Nud()
             {
-                return new AST("NEG", this.parser.Parse( this.Lbp ), null);
+                return new AST( "NEG", this.parser.Parse( Precedence.UnaryOp ), null );
             }
 
             public override AST Led(AST left)
