@@ -38,6 +38,7 @@ namespace TestApplication
             this.Add( new SubOperator( ) );
             this.Add( new InfixOperator( "/", Precedence.Multiplication, ( a, b ) => a / b ) );
             this.Add( new InfixOperator( "*", Precedence.Multiplication, ( a, b ) => a * b ) );
+            this.Add( new Group( "(", ")" ) );
 
             this.Add( new PostfixOperator( "!", Precedence.UnaryOp, this.factorial ) );
         }
@@ -127,6 +128,14 @@ namespace TestApplication
             else if ( ch == '!' )
             {
                 return this.Symbols[ "!" ];
+            }
+            else if ( ch == '(' )
+            {
+                return this.Symbols[ "(" ];
+            }
+            else if ( ch == ')' )
+            {
+                return ((Group)this.Symbols[ "(" ]).End;
             }
             else if ( ch == -1 )
             {

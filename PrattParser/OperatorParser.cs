@@ -38,6 +38,25 @@ namespace PrattParser
             }
         }
 
+        public class Group : Token
+        {
+            public Token End;
+
+            public Group(string start, string end)
+                : base(start)
+            {
+                this.End = new Token( end );
+            }
+
+            public override T Nud( )
+            {
+                T ret = this.parser.Parse( 0 );
+                this.parser.Step( this.End );
+
+                return ret;
+            }
+        }
+
         /// <summary>
         /// Operator base class. Class for any token that stores a function.
         /// </summary>

@@ -111,7 +111,7 @@ namespace PrattParser
         public T Parse(Precedence rbp)
         {
             Token t = this.token;
-            this.token = this.Advance();
+            this.Step( );
 
             // Handle first token of expression.
             T left = t.Nud();
@@ -120,7 +120,7 @@ namespace PrattParser
             while (rbp < token.Lbp)
             {
                 t = this.token;
-                this.token = this.Advance();
+                this.Step( );
                 left = t.Led(left);
             }
 
@@ -137,6 +137,19 @@ namespace PrattParser
         public virtual Token Advance()
         {
             throw new NotImplementedException( );
+        }
+
+        public void Step()
+        {
+            this.token = this.Advance( );
+        }
+
+        public void Step(Token t)
+        {
+            if ( this.token.Name != t.Name )
+                throw new Exception( );
+
+            this.token = this.Advance( );
         }
     }
 }
