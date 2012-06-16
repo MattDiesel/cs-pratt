@@ -46,7 +46,7 @@ namespace TestApplication
             this.Add( new SubOperator( ) );
             this.Add( new InfixOperator( "/", Precedence.Multiplication, ( a, b ) => a / b ) );
             this.Add( new InfixOperator( "*", Precedence.Multiplication, ( a, b ) => a * b ) );
-            this.Add( new Group( "(", ")" ) );
+            this.Add( new Group( "(", ")", (a, b) => a*b ) );
             this.Add( new Group( "{", "}" ) );
             this.Add( new Group( "[", "]" ) );
             this.Add( new Group( "<", ">" ) );

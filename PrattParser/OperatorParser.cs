@@ -41,11 +41,18 @@ namespace PrattParser
         public class Group : Token
         {
             public Token End;
+            private InfixOperation implicitOp;
 
             public Group(string start, string end)
+                : this(start, end, null)
+            {
+            }
+
+            public Group(string start, string end, InfixOperation op)
                 : base(start)
             {
                 this.End = new Token( end, Precedence.End );
+                this.implicitOp = op;
             }
 
             public override T Nud( )
@@ -54,6 +61,14 @@ namespace PrattParser
                 this.parser.Step( this.End );
 
                 return ret;
+            }
+
+            public override T Led( T left )
+            {
+                if (this.implicitOp == null)
+                    return base.Led( left );
+
+                return this.implicitOp(left, this.Nud());
             }
         }
 
