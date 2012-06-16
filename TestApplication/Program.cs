@@ -15,7 +15,7 @@ namespace TestApplication
             string s = Console.ReadLine( );
 
             SimpleParser p = new SimpleParser( );
-
+            
             StringReader r = new StringReader( s );
 
             Console.Write( "{0} = ", s );
@@ -33,7 +33,7 @@ namespace TestApplication
         }
     }
 
-    public class SimpleParser : OperatorParser<int>
+    public class SimpleParser : ASTParser
     {
         /// <summary>
         /// Contructs the simple parser, adding the operators.
@@ -44,22 +44,14 @@ namespace TestApplication
             this.Add( new Token( "(end)", Precedence.End ) );
             this.Add( new AddOperator( ) );
             this.Add( new SubOperator( ) );
-            this.Add( new InfixOperator( "/", Precedence.Multiplication, ( a, b ) => a / b ) );
-            this.Add( new InfixOperator( "*", Precedence.Multiplication, ( a, b ) => a * b ) );
-            this.Add( new Group( "(", ")", (a, b) => a*b ) );
+            this.Add( new InfixOperator( "/", Precedence.Multiplication, ( a, b ) => new AST("DIV", a, b ) ) );
+            this.Add( new InfixOperator( "*", Precedence.Multiplication, ( a, b ) => new AST("MUL", a, b ) ) );
+            this.Add( new Group( "(", ")", Precedence.Multiplication, (a, b) => new AST("MUL", a, b) ) );
             this.Add( new Group( "{", "}" ) );
             this.Add( new Group( "[", "]" ) );
             this.Add( new Group( "<", ">" ) );
 
-            this.Add( new PostfixOperator( "!", Precedence.UnaryOp, this.factorial ) );
-        }
-
-        public int factorial(int a)
-        {
-            if ( a <= 1 )
-                return 1;
-            else
-                return a * this.factorial( a - 1 );
+            this.Add( new PostfixOperator( "!", Precedence.UnaryOp, (a) => new AST("FACT", a, null) ) );
         }
 
         internal class AddOperator : Token
@@ -69,14 +61,14 @@ namespace TestApplication
             {
             }
 
-            public override int Nud()
+            public override AST Nud()
             {
-                return this.parser.Parse( this.Lbp );
+                return new AST("POS", this.parser.Parse( this.Lbp ), null);
             }
 
-            public override int Led(int left)
+            public override AST Led(AST left)
             {
-                return left + this.parser.Parse( this.Lbp );
+                return new AST("ADD", left, this.parser.Parse( this.Lbp ) );
             }
         }
 
@@ -87,18 +79,18 @@ namespace TestApplication
             {
             }
 
-            public override int Nud()
+            public override AST Nud()
             {
-                return -this.parser.Parse( this.Lbp );
+                return new AST("NEG", this.parser.Parse( this.Lbp ), null);
             }
 
-            public override int Led(int left)
+            public override AST Led(AST left)
             {
-                return left - this.parser.Parse( this.Lbp );
+                return new AST("SUB", left, this.parser.Parse( this.Lbp ) );
             }
         }
 
-        public override Token Advance( )
+        protected override Token Advance( )
         {
             int ch;
 
@@ -121,7 +113,7 @@ namespace TestApplication
                     ch = this.reader.Read( );
                 }
 
-                return new Literal( Int32.Parse( b.ToString( ) ) );
+                return new Literal(new AST(b.ToString(), null, null));
             }
             else if ( ch == -1 )
             {

@@ -67,13 +67,13 @@ namespace PrattParser
     /// </typeparam>
     public class Parser<T>
     {
-        public PositionalTextReader reader;
+        protected PositionalTextReader reader;
         private Token token;
 
         /// <summary>
         /// The symbol table.
         /// </summary>
-        public Dictionary<string, Token> Symbols;
+        protected Dictionary<string, Token> Symbols;
 
         public Parser()
         {
@@ -147,7 +147,7 @@ namespace PrattParser
         /// </summary>
         /// <param name="rbp">The right hand side binding power.</param>
         /// <returns>The result of type T.</returns>
-        public T Parse(Precedence rbp)
+        public T Parse( Precedence rbp )
         {
             Token t = this.token;
             this.Step( );
@@ -174,7 +174,7 @@ namespace PrattParser
         /// The current string being read is held in this.reader, and is designed to be used by this function.
         /// </remarks>
         /// <returns>Either a new token, or an existing one in the symbol table.</returns>
-        public virtual Token Advance()
+        protected virtual Token Advance()
         {
             throw new NotImplementedException( );
         }
@@ -192,7 +192,7 @@ namespace PrattParser
         /// type, and sets internal variables.
         /// </summary>
         /// <param name="t">The token type that must appear next.</param>
-        public void Step(Token t)
+        public void Step( Token t )
         {
             this.Step( t.Name );
         }
@@ -202,7 +202,7 @@ namespace PrattParser
         /// type, and sets internal variables.
         /// </summary>
         /// <param name="t">The token type name that must appear next.</param>
-        public void Step(string s)
+        public void Step( string s )
         {
             if ( ( s != "" ) && ( this.token.Name != s ) )
                 throw new Exception( );

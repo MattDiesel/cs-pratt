@@ -44,12 +44,16 @@ namespace PrattParser
             private InfixOperation implicitOp;
 
             public Group(string start, string end)
-                : this(start, end, null)
+                : this(start, end, 0, null)
             {
             }
 
-            public Group(string start, string end, InfixOperation op)
-                : base(start)
+            public Group(string start, string end, InfixOperator op)
+                : this(start, end, op.Lbp, op.Function)
+            {}
+
+            public Group(string start, string end, Precedence lbp, InfixOperation op)
+                : base(start, lbp)
             {
                 this.End = new Token( end, Precedence.End );
                 this.implicitOp = op;
