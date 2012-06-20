@@ -35,6 +35,13 @@ namespace TestApplication
 
     public class SimpleParser : ASTParser
     {
+        private Dictionary<string, Token> Symbols;
+
+        private void Add(Token t)
+        {
+            this.Symbols.Add( t.Name, t );
+        }
+
         /// <summary>
         /// Contructs the simple parser, adding the operators.
         /// </summary>

@@ -71,26 +71,6 @@ namespace PrattParser
         private Token token;
 
         /// <summary>
-        /// The symbol table.
-        /// </summary>
-        protected Dictionary<string, Token> Symbols;
-
-        public Parser()
-        {
-            this.Symbols = new Dictionary<string, Token>( );
-        }
-
-        /// <summary>
-        /// Adds a token to the list of symbols.
-        /// </summary>
-        /// <param name="t"></param>
-        public void Add(Token t)
-        {
-            t.parser = this;
-            this.Symbols.Add(t.Name, t);
-        }
-
-        /// <summary>
         /// Base Token class. All tokens must have a name, and a binding power.
         /// </summary>
         public class Token
